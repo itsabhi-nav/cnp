@@ -1,0 +1,59 @@
+#include <stdio.h>
+
+struct edge {
+    int u, v, weight;
+} edges[100];
+
+int parent[100], edge_count = 0;
+
+void getEdges(int total) {
+    for (int i = 0; i < total; i++)
+        for (int j = i + 1; j < total; j++) {
+            printf("Enter distance between Vertex %c and %c: ", i + 65, j + 65);
+            scanf("%d", &edges[edge_count].weight);
+            edges[edge_count].u = i;
+            edges[edge_count].v = j;
+            edge_count++;
+        }
+}
+
+int find(int i) {
+    return (parent[i] == i) ? i : (parent[i] = find(parent[i]));
+}
+
+void unionSet(int i, int j) {
+    parent[find(i)] = find(j);
+}
+
+void sortEdges() {
+    for (int i = 0; i < edge_count - 1; i++)
+        for (int j = 0; j < edge_count - i - 1; j++)
+            if (edges[j].weight > edges[j + 1].weight) {
+                struct edge temp = edges[j];
+                edges[j] = edges[j + 1];
+                edges[j + 1] = temp;
+            }
+}
+
+void kruskal(int total) {
+    for (int i = 0; i < total; i++) parent[i] = i;
+    sortEdges();
+    printf("\nMinimum Spanning Tree:\n");
+    for (int i = 0, count = 0; count < total - 1 && i < edge_count; i++) {
+        int u = find(edges[i].u), v = find(edges[i].v);
+        if (u != v) {
+            printf("%c <-> %c : %d\n", edges[i].u + 65, edges[i].v + 65, edges[i].weight);
+            unionSet(u, v);
+            count++;
+        }
+    }
+}
+
+int main() {
+    int total;
+    printf("Enter the number of nodes: ");
+    scanf("%d", &total);
+    getEdges(total);
+    kruskal(total);
+    return 0;
+}
