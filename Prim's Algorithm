@@ -1,0 +1,57 @@
+#include <stdio.h>
+#define INF 999
+
+int prim(int cost[10][10], int source, int n) {
+    int i, j, sum = 0, min, u;
+    int visited[10] = {0}, minCost[10], parent[10];
+
+    for (i = 1; i <= n; i++) {
+        parent[i] = source;
+        minCost[i] = cost[source][i];
+    }
+    visited[source] = 1;
+
+    for (i = 1; i < n; i++) {
+        min = INF;
+        for (j = 1; j <= n; j++) {
+            if (!visited[j] && minCost[j] < min) {
+                min = minCost[j];
+                u = j;
+            }
+        }
+        visited[u] = 1;
+        sum += min;
+        printf("\n %d -> %d (cost = %d)", parent[u], u, min);
+        for (j = 1; j <= n; j++) {
+            if (!visited[j] && cost[u][j] < minCost[j]) {
+                minCost[j] = cost[u][j];
+                parent[j] = u;
+            }
+        }
+    }
+    return sum;
+}
+
+int main() {
+    int cost[10][10], n, i, j, source;
+
+    printf("Vertices: ");
+    scanf("%d", &n);
+    printf("Cost matrix (0 for self-loop, %d for no edge):\n", INF);
+    for (i = 1; i <= n; i++)
+        for (j = 1; j <= n; j++)
+            scanf("%d", &cost[i][j]);
+
+    for (i = 1; i <= n; i++)
+        for (j = 1; j <= n; j++)
+            if (cost[i][j] != cost[j][i] || cost[i][i] != 0) {
+                printf("Invalid matrix\n");
+                return 1;
+            }
+
+    printf("Source: ");
+    scanf("%d", &source);
+
+    printf("Total cost = %d\n", prim(cost, source, n));
+    return 0;
+}
