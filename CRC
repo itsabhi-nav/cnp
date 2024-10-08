@@ -1,72 +1,47 @@
-#include<stdio.h>
-#include<conio.h>
+#include <stdio.h>
 #define DEGREE 16
-int mod2add(int,int);
-int getnext(int*,int);
-int result[30];
-void calc_crc(int length)
-{
-int ccitt[]={1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
-int i=0,pos=0,newpos;
-while(pos<length-DEGREE)
-{
-for(i=pos;i<pos+DEGREE+1;++i)
-result[i]=mod2add(result[i],ccitt[i-pos]);
-newpos=getnext(result,pos);
-if(newpos>pos+1)
-pos=newpos-1;
-++pos;
-} }
-int getnext(int array[],intpos)
-{
-int i=pos;
-while(array[i]==0)
-++i;
-return i;
+
+int mod2add(int x, int y) { return x ^ y; }
+
+int getnext(int array[], int pos) {
+    while (pos < DEGREE && array[pos] == 0) ++pos;
+    return pos;
 }
-int mod2add(intx,int y)
-{
-return(x==y?0:1);
+
+void calc_crc(int length, int result[]) {
+    int ccitt[DEGREE + 1] = {1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}, pos = 0;
+
+    while (pos <= length - DEGREE) {
+        for (int i = 0; i <= DEGREE; ++i)
+            result[pos + i] = mod2add(result[pos + i], ccitt[i]);
+        pos = getnext(result, pos);
+    }
 }
-int main()
-{
-int array[30],length,i=0;
-char ch;
-printf("Enter the data (Message) stream:");
-do{
-scanf("%c",&ch);
-if(ch=='\n')
-break;
-array[i++]=ch-'0';
-} while(ch!='\n');
-length=i;
-/*Appending DEGREE number of zeros to the message*/
-for(i=0;i<DEGREE;++i)
-array[i+length]=0;
-length+=DEGREE;
-for(i=0;i<length;++i)
-result[i]=array[i]; /*Copy into result Array*/
-calc_crc(length); /*CRC Calculation*/
-printf("\nThe transmitted frame is :");
-for(i=0;i<length-DEGREE;++i)
-printf("%d",array[i]); /*Message*/
-for(i=length-DEGREE;i<length;++i)
-printf("%d",result[i]); /*Remainder*/
-/*Decoding*/
-printf("\n Enter the stream for which CRC has to be checked:");
-i=0;
-do{
-scanf("%c",&ch);
-if(ch=='\n')
-break;
-array[i++]=ch-'0';
-}while(ch!='\n');
-length=i;
-for(i=0;i<length;i++)
-result[i]=array[i];
-calc_crc(length);
-printf("\n Calculated Checksum:");
-for(i=length-DEGREE;i<length;i++)
-printf("%d",result[i]);
-return 0;
+
+int main() {
+    int array[30], result[30], length = 0;
+    char ch;
+
+    printf("Enter the data (Message) stream: ");
+    while ((ch = getchar()) != '\n') array[length++] = ch - '0';
+
+    for (int i = 0; i < DEGREE; ++i) array[length + i] = result[length + i] = 0;
+
+    for (int i = 0; i < length + DEGREE; ++i) result[i] = array[i];
+    calc_crc(length + DEGREE, result);
+
+    printf("\nThe transmitted frame is: ");
+    for (int i = 0; i < length + DEGREE; ++i) printf("%d", i < length ? array[i] : result[i]);
+
+    printf("\nEnter the stream for which CRC has to be checked: ");
+    length = 0;
+    while ((ch = getchar()) != '\n') array[length++] = ch - '0';
+
+    for (int i = 0; i < length; ++i) result[i] = array[i];
+    calc_crc(length, result);
+
+    printf("\nCalculated Checksum: ");
+    for (int i = length - DEGREE; i < length; ++i) printf("%d", result[i]);
+
+    return 0;
 }
